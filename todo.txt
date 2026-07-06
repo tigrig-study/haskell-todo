@@ -1,2 +1,2 @@
-hoge
+x|hoge
 fuga

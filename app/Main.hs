@@ -1,7 +1,11 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Main where
 
+import Data.Text qualified as T
+import Data.Text.IO qualified as TIO
 import System.Environment (getArgs)
-import System.IO (IOMode (AppendMode, ReadMode), hGetContents, hPutStrLn, hSetEncoding, utf8, withFile)
+import System.IO (IOMode (AppendMode, ReadMode, WriteMode), hGetContents, hPutStrLn, hSetEncoding, utf8, withFile)
 
 main :: IO ()
 main = do
@@ -18,6 +22,16 @@ main = do
         contents <- hGetContents handle
         let tasks = formatTasks $ lines contents
         mapM_ putStrLn tasks
+    ["done"] -> do
+      text <- TIO.readFile "todo.txt"
+      let newText = case T.lines text of
+            [] -> ""
+            (firstLine : restLines) ->
+              let newFirstLine = "x|" <> firstLine
+               in T.unlines (newFirstLine : restLines)
+      withFile "todo.txt" WriteMode $ \handle -> do
+        hSetEncoding handle utf8
+        TIO.hPutStr handle newText
     _ -> putStrLn "不正な引数です。'list' を指定してください。"
 
 formatTasks :: [String] -> [String]
